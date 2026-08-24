@@ -1,0 +1,6 @@
+{
+  "name": "Amr3D Preview Pro & Nesting",
+  "description": "Professional 3D & 2D CAD/CAM Viewer, Nesting Engine, DXF Gap Checker, Slicer, and Mesh Repair Suite for Laser & CNC.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
