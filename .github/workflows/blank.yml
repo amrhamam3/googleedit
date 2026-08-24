@@ -29,7 +29,7 @@ jobs:
       - name: Build Web Dist
         run: npm run build
 
-      # 3. إعداد بيئة Java 21 (المطلوبة لـ Capacitor 7 و Gradle 8.11)
+      # 3. إعداد بيئة Java 21
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -40,7 +40,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # 5. تثبيت Capacitor وبناء بيئة الأندرويد تلقائياً
+      # 5. تهيئة مشروع Capacitor Android
       - name: Initialize Android Project with Capacitor
         run: |
           npm install @capacitor/core @capacitor/cli @capacitor/android --save
@@ -48,18 +48,33 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      # 6. إعطاء صلاحيات التشغيل لـ gradlew
+      # 6. حل مشكلة Duplicate Class (Kotlin Stdlib Conflict)
+      - name: Fix Duplicate Kotlin Classes in Gradle
+        run: |
+          cat << 'EOF' >> android/app/build.gradle
+
+          configurations.all {
+              resolutionStrategy {
+                  force 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22'
+                  force 'org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22'
+              }
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk7'
+              exclude group: 'org.jetbrains.kotlin', module: 'kotlin-stdlib-jdk8'
+          }
+          EOF
+
+      # 7. إعطاء صلاحيات التشغيل وبناء الـ APK
       - name: Grant Execute Permission to Gradlew
         run: chmod +x android/gradlew
 
-      # 7. تجميع وبناء ملف الـ APK
       - name: Assemble Debug APK
         run: |
           cd android
           ./gradlew assembleDebug --stacktrace
 
-      # 8. رفع ملف الـ APK الناتج للتنزيل الفوري
-      - name: Upload Debug APK
+      # 8. رفع وتوفير ملف الـ APK للتنزيل المباشر
+      - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Amr3D-PreviewPro-Android-APK
